@@ -1,0 +1,173 @@
+import json
+import os
+import boto3
+
+def lambda_handler(event, context):
+    # boto3 client
+    s3 = boto3.client('s3')
+    
+    # replace below configuration
+    bucket_name = 'alphaslate-lambda-test-input'
+    output_bucket_name = 'alphaslate-lambda-test-output'
+    key = 'cambridge_12.mp4'
+
+    # downloading file to /tmp directory within lambda
+    lambda_file_path = f'/tmp/{key}'
+    lambda_output_file_path = '/tmp/test3_cambridge_12.avi'
+    # downloading file
+    s3.download_file(bucket_name, key, lambda_file_path)
+    
+    # transcoding
+    os.system(f'/opt/ffmpeglib/ffmpeg -i {lambda_file_path} {lambda_output_file_path}')
+    
+    # uploading transcoded file
+    s3.upload_file(Bucket=output_bucket_name, Key=lambda_output_file_path.split('/')[-1], Filename=lambda_output_file_path)
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Srce Cde!')
+    }
+
+
+
+
+
+################for mkv###########################
+
+import json
+import os
+import boto3
+
+def lambda_handler(event, context):
+    # boto3 client
+    s3 = boto3.client('s3')
+    
+    # replace below configuration
+    bucket_name = 'alphaslate-lambda-test-input'
+    output_bucket_name = 'alphaslate-lambda-test-output'
+    key = 'cambridge_12.mp4'
+
+    # downloading file to /tmp directory within lambda
+    lambda_file_path = f'/tmp/{key}'
+    lambda_output_file_path = '/tmp/test4_cambridge_12.mkv'
+    # downloading file
+    s3.download_file(bucket_name, key, lambda_file_path)
+    
+    # transcoding
+    os.system(f'/opt/ffmpeglib/ffmpeg -i {lambda_file_path} {lambda_output_file_path}')
+    
+    # uploading transcoded file
+    s3.upload_file(Bucket=output_bucket_name, Key=lambda_output_file_path.split('/')[-1], Filename=lambda_output_file_path)
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Srce Cde!')
+    }
+
+
+import json
+import os
+import boto3
+
+
+
+
+
+def lambda_handler(event, context):
+    # boto3 client
+    s3 = boto3.client('s3')
+    
+    # replace below configuration
+    bucket_name = 'alphaslate-lambda-test-input'
+    output_bucket_name = 'alphaslate-lambda-test-output'
+    key = 'cambridge_12.mp4'
+
+    # downloading file to /tmp directory within lambda
+    lambda_file_path = f'/tmp/{key}'
+    lambda_output_file_path = '/tmp/test4_cambridge_12.mkv'
+    # downloading file
+    s3.download_file(bucket_name, key, lambda_file_path)
+    
+    # transcoding
+    os.system(f'/opt/ffmpeglib/ffmpeg -i {lambda_file_path} {lambda_output_file_path}')
+    
+    # uploading transcoded file
+    s3.upload_file(Bucket=output_bucket_name, Key=lambda_output_file_path.split('/')[-1], Filename=lambda_output_file_path)
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Srce Cde!')
+    }
+
+
+#####################################using folders#####################################
+import json
+import os
+import boto3
+from pathlib import Path
+
+
+
+def lambda_handler(event, context):
+    print("Inside the lambda handler function")
+    # boto3 client
+    s3 = boto3.client('s3')
+    
+    # Input and output bucket 
+    input_bucket_name = 'alphaslate-lambda-test-input'
+    output_bucket_name = 'alphaslate-lambda-test-output'
+    filename='cambridge_dir2/'
+    key = 'cambridge_12.mp4'
+
+    # downloading file to /tmp directory within lambda
+    lambda_file_path = f'/tmp/{key}'
+    
+    
+    
+    # downloading file
+    print('Downloading file to ' + lambda_file_path)
+    s3.download_file(input_bucket_name, key, lambda_file_path)
+    file_size_bytes = Path(lambda_file_path).stat().st_size
+    file_size_mb = round((int(file_size_bytes)/1024)/1024,0)
+    print('File download successful. File size: ' + str(file_size_mb) + ' MB')
+
+    os.system(f'mkdir /tmp/' + filename)    
+    lambda_output_file_path ='/tmp/' + filename
+    
+    # lambda_output_file_path = '/tmp/test4_cambridge_12.mkv'
+    
+    
+    
+    # transcoding
+    print('Transcoding......')
+    os.system(f'/opt/ffmpeglib/ffmpeg -i {lambda_file_path} {lambda_output_file_path}/test5_cambridge_12.mkv')
+    print('Transcoding successful')
+    
+    
+    
+    # uploading transcoded file
+    print('Uploading to bucket')
+    uploadDirectory(s3, filename, lambda_output_file_path, output_bucket_name)
+    
+    
+    
+    #s3.upload_file(Bucket=output_bucket_name, Key=lambda_output_file_path.split('/')[-1], Filename=lambda_output_file_path)
+    
+    print('Uploading Successful')
+    
+    
+    
+    
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Srce Cde!')
+    }
+
+def uploadDirectory(s3, filename, path, output_bucket_name):
+    for root,dirs,files in os.walk(path):
+        for file in files:
+            print("Uploading " + root + "/" + file)
+            s3.upload_file(os.path.join(root,file),output_bucket_name, filename + file)
+
+
